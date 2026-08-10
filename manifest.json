@@ -1,0 +1,11 @@
+{
+	"id": "places-photon",
+	"name": "Places - Photon",
+	"version": "0.0.1",
+	"minAppVersion": "1.13.0",
+	"description": "Search provider for Places using Photon, with POI search over OpenStreetMap data.",
+	"author": "Bob Stanton",
+	"authorUrl": "https://github.com/bobstanton",
+	"fundingUrl": "https://ko-fi.com/bobsoftware",
+	"isDesktopOnly": false
+}
