@@ -43,7 +43,9 @@ export class PhotonApiService implements IPlacesService {
   private baseParams(limit = DEFAULT_LIMIT): URLSearchParams {
     const params = new URLSearchParams({ limit: String(limit) });
     const language = this.extensionSettings.language?.trim();
+
     if (language) params.set("lang", language);
+
     return params;
   }
 
@@ -59,9 +61,11 @@ export class PhotonApiService implements IPlacesService {
 
   async lookupPlaceByCoordinates(coordinate: Coordinate): Promise<Place[]> {
     const params = this.baseParams(1);
+
     params.set("lat", String(coordinate.latitude));
     params.set("lon", String(coordinate.longitude));
     const data = await photonRequest<PhotonResponse>(this.baseUrl, "/reverse", params);
+
     return (data.features ?? []).map(feature => this.toPlace(feature)).filter((place): place is Place => place !== null);
   }
 
@@ -72,41 +76,51 @@ export class PhotonApiService implements IPlacesService {
       const parsed = parseNearQuery(query);
       const searchQuery = parsed ? `${parsed.poi}, ${parsed.location}` : query;
       const params = this.baseParams();
+
       params.set("q", searchQuery);
       params.set("bbox", `${bounds.minLng},${bounds.minLat},${bounds.maxLng},${bounds.maxLat}`);
       const data = await photonRequest<PhotonResponse>(this.baseUrl, "/api/", params);
+
       return (data.features ?? []).map(feature => this.toPlace(feature)).filter((place): place is Place => place !== null);
     } catch (error) {
       logger.scope('Places').error('[Photon] lookupPlaceInBounds error:', error);
+
       throw error;
     }
   }
 
   private async executeSearch(query: string): Promise<Place[]> {
     const params = this.baseParams();
+
     params.set("q", query);
     const data = await photonRequest<PhotonResponse>(this.baseUrl, "/api/", params);
+
     return (data.features ?? []).map(feature => this.toPlace(feature)).filter((place): place is Place => place !== null);
   }
 
   private async geocodeLocationBounds(location: string, mode: 'near' | 'in'): Promise<{ bounds: PlacesBoundingBox } | null> {
     const params = this.baseParams(1);
+
     params.set("q", location);
     const data = await photonRequest<PhotonResponse>(this.baseUrl, "/api/", params);
     const extent = data.features?.[0]?.properties?.extent;
+
     if (!extent) return null;
 
     const [minLng, maxLat, maxLng, minLat] = extent;
     const bounds = new PlacesBoundingBox(minLat, minLng, maxLat, maxLng);
+
     if (mode === 'near') {
       bounds.applyPadding(0.5);
     }
+
     return { bounds };
   }
 
   private toPlace(feature: PhotonFeature): Place | null {
     const coordinates = feature.geometry?.coordinates;
     const properties = feature.properties;
+
     if (!coordinates || !properties) return null;
     const [longitude, latitude] = coordinates;
 

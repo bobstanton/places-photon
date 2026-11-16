@@ -17,8 +17,10 @@ export async function photonRequest<T>(baseUrl: string, path: string, params: UR
   await limiter.wait();
   const root = (baseUrl || PHOTON_BASE_URL).replace(/\/+$/, "");
   const response = await requestUrl({ url: `${root}${path}?${params.toString()}`, method: "GET", headers: PHOTON_HEADERS });
+
   if (response.status !== 200) {
     throw new Error(`Photon API error: ${response.status}`);
   }
+
   return response.json as T;
 }
